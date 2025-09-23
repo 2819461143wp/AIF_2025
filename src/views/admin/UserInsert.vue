@@ -10,18 +10,13 @@ const excelHeaders = ref([])
 const rowErrors = ref({})
 const originalFile = ref(null)
 
-const SAMPLE_HEADERS = ['账号', '密码', '角色']
+// 只保留账号和密码
+const SAMPLE_HEADERS = ['账号', '密码']
 
-const roleOptions = [
-  { label: 'user', value: 'user' },
-  { label: 'admin', value: 'admin' },
-]
-
-// 校验规则
+// 校验规则只保留账号和密码
 const validationRules = {
   账号: (v) => !!v?.trim() || '账号不能为空',
   密码: (v) => !!v?.trim() || '密码不能为空',
-  角色: (v) => !!v?.trim() || '角色不能为空',
 }
 
 const hasValidationErrors = computed(() => Object.keys(rowErrors.value).length > 0)
@@ -95,6 +90,7 @@ const handleImport = async () => {
   }
 }
 
+// 下载模板只包含账号和密码
 const downloadTemplate = () => {
   const workbook = utils.book_new()
   const worksheet = utils.aoa_to_sheet([SAMPLE_HEADERS])
@@ -130,7 +126,7 @@ const validateRow = (row, rowIndex) => {
     <el-card shadow="hover" class="flex-card">
       <template #header>
         <div class="card-header">
-          <span>用户批量导入 (账号/密码/角色)</span>
+          <span>用户批量导入 (账号/密码)</span>
           <el-button type="primary" link @click="downloadTemplate"> 下载模板 </el-button>
         </div>
       </template>
@@ -168,23 +164,7 @@ const validateRow = (row, rowIndex) => {
             :label="header"
           >
             <template #default="{ row, $index }">
-              <template v-if="header === '角色'">
-                <el-select
-                  v-model="row[header]"
-                  @change="validateRow(row, $index)"
-                  :class="{ 'error-cell': rowErrors[$index]?.includes(header) }"
-                  placeholder="请选择角色"
-                >
-                  <el-option
-                    v-for="option in roleOptions"
-                    :key="option.value"
-                    :label="option.label"
-                    :value="option.value"
-                  />
-                </el-select>
-              </template>
               <el-input
-                v-else
                 v-model="row[header]"
                 @change="validateRow(row, $index)"
                 :class="{ 'error-cell': rowErrors[$index]?.includes(header) }"
@@ -196,7 +176,6 @@ const validateRow = (row, rowIndex) => {
     </el-card>
   </div>
 </template>
-
 <style scoped>
 .card-header {
   display: flex;

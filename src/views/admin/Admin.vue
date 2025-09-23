@@ -32,26 +32,20 @@ const toggleCollapse = () => {
             </el-icon>
           </div>
           <!-- 系统管理 -->
-          <el-sub-menu index="/admin/system">
-            <template #title>
-              <el-icon><HomeFilled /></el-icon>
-              <span>仪表盘</span>
-            </template>
-            <el-menu-item index="/admin/system/analysis">
-              <el-icon><PieChart /></el-icon>
-              <span>数据看板</span>
-            </el-menu-item>
-            <el-menu-item index="/admin/system/role">
-              <el-icon><User /></el-icon>
-              <span>角色管理</span>
-            </el-menu-item>
-          </el-sub-menu>
 
+          <el-menu-item index="/admin/system/analysis">
+            <el-icon><HomeFilled /></el-icon>
+            <span>数据看板</span>
+          </el-menu-item>
           <el-sub-menu index="/admin/user">
             <template #title>
               <el-icon><UserFilled /></el-icon>
               <span>用户管理</span>
             </template>
+            <el-menu-item index="/admin/system/role">
+              <el-icon><User /></el-icon>
+              <span>角色管理</span>
+            </el-menu-item>
             <el-menu-item index="/admin/user/update">
               <el-icon><Edit /></el-icon>
               <span>用户信息修改</span>
@@ -76,24 +70,10 @@ const toggleCollapse = () => {
               <span>贴子列表</span>
             </el-menu-item>
           </el-sub-menu> -->
-          <el-sub-menu index="/admin/model">
-            <template #title>
-              <el-icon><Platform /></el-icon>
-              <span>智能分析</span>
-            </template>
-            <el-menu-item index="/admin/model/data">
-              <el-icon><Upload /></el-icon>
-              <span>数据上传</span>
-            </el-menu-item>
-            <el-menu-item index="/admin/model/predict">
-              <el-icon><Document /></el-icon>
-              <span>故障预测</span>
-            </el-menu-item>
-            <el-menu-item index="/admin/model/advice">
-              <el-icon><Edit /></el-icon>
-              <span>建议生成</span>
-            </el-menu-item>
-          </el-sub-menu>
+          <el-menu-item index="/admin/model">
+            <el-icon><Platform /></el-icon>
+            <span>故障检测</span>
+          </el-menu-item>
           <el-sub-menu index="/admin/equip">
             <template #title>
               <el-icon><BellFilled /></el-icon>

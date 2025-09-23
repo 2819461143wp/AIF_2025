@@ -78,7 +78,7 @@ const availableUsers = computed(() => {
 const initData = () => {
   // 模拟用户数据
   users.value = [
-    { id: '1', username: 'admin', role: 'admin', email: 'admin@example.com' },
+    { id: '1', username: 'cwdpsky', role: 'admin', email: 'admin@example.com' },
     { id: '2', username: 'user1', role: 'user', email: 'user1@example.com' },
     { id: '3', username: 'user2', role: 'user', email: 'user2@example.com' },
     { id: '4', username: 'manager1', role: 'manager', email: 'manager1@example.com' },

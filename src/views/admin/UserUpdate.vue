@@ -24,7 +24,7 @@ const formatUUID = (uuid) => {
 // 获取用户数据
 const fetchUsers = async () => {
   try {
-    const response = await axios.get('/api/admin/users/get', {
+    const response = await axios.get('/api/user/getuser', {
       params: {
         pageNum: currentPage.value,
         pageSize: pageSize.value,
@@ -76,12 +76,11 @@ const cancelEdit = (row) => {
 const handleSave = async (row) => {
   try {
     // 使用axios发送表单数据
-    const response = await axios.post('/api/admin/users/update', null, {
+    const response = await axios.post('/api/user/update', null, {
       params: {
         id: row.id,
         username: row.username,
         password: row.password,
-        role: row.role,
       },
     })
 
@@ -134,19 +133,6 @@ onMounted(() => {
             show-password
           />
           <span v-else>{{ row.password.replace(/./g, '*') }}</span>
-        </template>
-      </el-table-column>
-
-      <!-- 角色列（可编辑） -->
-      <el-table-column prop="role" label="角色">
-        <template #default="{ row }">
-          <el-select v-if="editableIds.includes(row.id)" v-model="row.role">
-            <el-option label="用户" value="user" />
-            <el-option label="管理员" value="admin" />
-          </el-select>
-          <el-tag v-else :type="row.role === 'admin' ? 'success' : ''">
-            {{ row.role === 'admin' ? '管理员' : '普通用户' }}
-          </el-tag>
         </template>
       </el-table-column>
 

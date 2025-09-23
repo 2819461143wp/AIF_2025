@@ -20,7 +20,8 @@ const handleLogin = async (e) => {
     })
     if (response.status === 200) {
       alert('登录成功')
-      router.push('/') // 登录成功后跳转到主页
+      // 使用 location.href 替代 router.push，跳转并刷新页面
+      window.location.href = '/admin/system/analysis'
     }
   } catch (error) {
     console.error('登录失败:', error)

@@ -45,12 +45,12 @@ const technicians = ref([
 
 // 设备参数模板
 const parameterTemplates = ref({
-  temperature: { name: '温度', unit: '℃', type: 'number' },
-  pressure: { name: '压力', unit: 'MPa', type: 'number' },
-  speed: { name: '转速', unit: 'rpm', type: 'number' },
-  power: { name: '功率', unit: 'kW', type: 'number' },
+  current: { name: '电流', unit: 'A', type: 'number' },
   voltage: { name: '电压', unit: 'V', type: 'number' },
-  frequency: { name: '频率', unit: 'Hz', type: 'number' }
+  power: { name: '功率', unit: 'W', type: 'number' },
+  frequency: { name: '频率', unit: 'Hz', type: 'number' },
+  currentVector: { name: '电流矢量和', unit: 'A', type: 'number' },
+  waveformDistortion: { name: '波形畸变率', unit: '%', type: 'number' }
 })
 
 // 过滤后的设备列表
@@ -83,35 +83,107 @@ const initData = () => {
   devices.value = [
     {
       id: '1',
-      name: '生产线A-压缩机1',
-      type: '压缩机',
-      location: '车间A-01',
+      name: 'Citiiaqua DL-500',
+      type: '电力负载设备',
+      brand: 'Citiiaqua',
+      model: 'DL-500',
+      location: '负载区-01',
       status: 'running',
-      model: 'AC-2000'
+      maxPower: 13,
+      voltage: 127,
+      frequency: 60,
+      comments: ''
     },
     {
       id: '2',
-      name: '生产线B-电机2',
-      type: '电机',
-      location: '车间B-02',
-      status: 'maintenance',
-      model: 'EM-3000'
+      name: 'Asus AD2037020',
+      type: '电力负载设备',
+      brand: 'Asus',
+      model: 'AD2037020',
+      location: '负载区-02',
+      status: 'running',
+      maxPower: 38.1,
+      voltage: '110-240',
+      frequency: '50-60',
+      comments: 'connected on a phone Asus X008D with 42% battery percentage at the beginning of the acquisition session.'
     },
     {
       id: '3',
-      name: '冷却系统-冷却塔1',
-      type: '冷却塔',
-      location: '冷却区-01',
+      name: 'Bosch Furadeira de Impacto',
+      type: '电力负载设备',
+      brand: 'Bosch',
+      model: 'Furadeira de Impacto 2 velocidades 350W (0,47CV) 0 603 147 547',
+      location: '负载区-03',
       status: 'running',
-      model: 'CT-1500'
+      maxPower: 350,
+      voltage: 127,
+      frequency: 60,
+      comments: 'control speed on position 2 (170W, after the transient)'
     },
     {
       id: '4',
-      name: '供电系统-变压器1',
-      type: '变压器',
-      location: '配电室-01',
+      name: 'Pelonis NYLA-7',
+      type: '电力负载设备',
+      brand: 'Pelonis',
+      model: 'NYLA-7',
+      location: '负载区-04',
       status: 'running',
-      model: 'TR-5000'
+      maxPower: 1500,
+      voltage: 127,
+      frequency: 60,
+      comments: 'power control on position 1 (518W)'
+    },
+    {
+      id: '5',
+      name: 'Sony PCG-61112L',
+      type: '电力负载设备',
+      brand: 'Sony',
+      model: 'PCG-61112L',
+      location: '负载区-05',
+      status: 'running',
+      maxPower: 92,
+      voltage: 127,
+      frequency: 60,
+      comments: 'Laptop with 94% battery percentage at the beginning of the acquisition session.'
+    },
+    {
+      id: '6',
+      name: 'Osram Centra A CL 100',
+      type: '电力负载设备',
+      brand: 'Osram',
+      model: 'Centra A CL 100',
+      location: '负载区-06',
+      status: 'running',
+      maxPower: 100,
+      voltage: 127,
+      frequency: 60,
+      comments: ''
+    },
+    {
+      id: '7',
+      name: 'Weller WLC100',
+      type: '电力负载设备',
+      brand: 'Weller',
+      model: 'WLC100',
+      location: '负载区-07',
+      status: 'running',
+      maxPower: 40,
+      voltage: 127,
+      frequency: 60,
+      comments: 'power control on the maximum power'
+    },
+    {
+      id: '8',
+      name: 'Toyo Ts-153',
+      type: '电力负载设备',
+      brand: 'Toyo',
+      model: 'Ts-153',
+      location: '负载区-08',
+      status: 'running',
+      maxPower: 23,
+      voltage: 127,
+      frequency: 60,
+      comments: ''
     }
   ]
 
@@ -121,8 +193,8 @@ const initData = () => {
       id: '1',
       deviceId: '1',
       type: 'maintenance',
-      title: '压缩机异响检修',
-      description: '压缩机运行时发现异响，需要检查轴承和密封件',
+      title: '漏电检测检修',
+      description: '检测到电流矢量和不为零，可能存在漏电风险，需要检查线路绝缘',
       priority: 'high',
       status: 'pending',
       assignedTo: '1',
@@ -133,18 +205,57 @@ const initData = () => {
     {
       id: '2',
       deviceId: '2',
-      type: 'optimization',
-      title: '电机能效优化',
-      description: '调整电机运行参数，提高能效比',
-      priority: 'medium',
+      type: 'maintenance',
+      title: '短路检测处理',
+      description: '检测到电流骤升和波形畸变，疑似短路故障，需要立即检修',
+      priority: 'urgent',
       status: 'in_progress',
       assignedTo: '4',
       targetDate: '2024-08-30',
       parameters: [
-        { name: '功率', currentValue: '2500', targetValue: '2200', unit: 'kW' },
-        { name: '转速', currentValue: '1500', targetValue: '1400', unit: 'rpm' }
+        { name: '电流', currentValue: '15.2', targetValue: '5.8', unit: 'A' },
+        { name: '波形畸变率', currentValue: '25%', targetValue: '5%', unit: '%' }
       ],
       createTime: '2024-08-19 14:30:00',
+      createBy: 'admin'
+    },
+    {
+      id: '3',
+      deviceId: '3',
+      type: 'maintenance',
+      title: '过载检测处理',
+      description: '设备持续超额定功率运行，存在过载风险，需要检查负载情况',
+      priority: 'high',
+      status: 'pending',
+      assignedTo: '2',
+      targetDate: '2024-09-01',
+      createTime: '2024-08-21 10:15:00',
+      createBy: 'admin'
+    },
+    {
+      id: '4',
+      deviceId: '4',
+      type: 'maintenance',
+      title: '过压/欠压检测',
+      description: '检测到电压超出安全阈值范围，需要检查供电系统稳定性',
+      priority: 'medium',
+      status: 'pending',
+      assignedTo: '3',
+      targetDate: '2024-08-28',
+      createTime: '2024-08-18 16:20:00',
+      createBy: 'admin'
+    },
+    {
+      id: '5',
+      deviceId: '5',
+      type: 'maintenance',
+      title: '设备状态检测',
+      description: '设备突然关闭，需要检测设备启动/停止/待机状态及控制电路',
+      priority: 'medium',
+      status: 'pending',
+      assignedTo: '1',
+      targetDate: '2024-08-29',
+      createTime: '2024-08-22 11:30:00',
       createBy: 'admin'
     }
   ]

@@ -44,25 +44,30 @@ const router = createRouter({
           component: () => import('@/views/admin/UserUpdate.vue'),
         },
         {
-          path: 'model/data',
-          name: 'adminData',
-          component: () => import('@/views/admin/DataUpload.vue'),
+          path: 'model',
+          name: 'adminModel',
+          component: () => import('@/views/admin/FaultDetection.vue'),
         },
-        {
-          path: 'model/train',
-          name: 'modelTrain',
-          component: () => import('@/views/admin/ModelTrain.vue'),
-        },
-        {
-          path: 'model/predict',
-          name: 'modelPredict',
-          component: () => import('@/views/admin/ModelPredict.vue'),
-        },
-        {
-          path: 'model/advice',
-          name: 'modelAdvice',
-          component: () => import('@/views/admin/ModelAdvice.vue'),
-        },
+        // {
+        //   path: 'model/data',
+        //   name: 'adminData',
+        //   component: () => import('@/views/admin/DataUpload.vue'),
+        // },
+        // {
+        //   path: 'model/train',
+        //   name: 'modelTrain',
+        //   component: () => import('@/views/admin/ModelTrain.vue'),
+        // },
+        // {
+        //   path: 'model/predict',
+        //   name: 'modelPredict',
+        //   component: () => import('@/views/admin/ModelPredict.vue'),
+        // },
+        // {
+        //   path: 'model/advice',
+        //   name: 'modelAdvice',
+        //   component: () => import('@/views/admin/ModelAdvice.vue'),
+        // },
         {
           path: 'equip/order',
           name: 'equipOrder',

@@ -19,26 +19,26 @@ export const userStore = defineStore('auth', {
     userId: localStorage.getItem('userId') || '',
     name: localStorage.getItem('userName') || '',
     image: localStorage.getItem('userImage') || '',
-    role: localStorage.getItem('Role') || '',
+    // role: localStorage.getItem('Role') || '',
   }),
   actions: {
     login(id: string, name: string, role: string) {
       this.isLoggedIn = true
       this.userId = id
       this.name = name
-      this.role = role
+      // this.role = role
 
       localStorage.setItem('isLoggedIn', 'true')
       localStorage.setItem('userId', id)
       localStorage.setItem('userName', name)
-      localStorage.setItem('Role', role)
+      // localStorage.setItem('Role', role)
     },
     logout() {
       this.$reset() // 重置为初始状态
       localStorage.removeItem('isLoggedIn')
       localStorage.removeItem('userId')
       localStorage.removeItem('userName')
-      localStorage.removeItem('Role')
+      // localStorage.removeItem('Role')
       message.success('Logout successfully')
     },
     updateName(name: string) {
