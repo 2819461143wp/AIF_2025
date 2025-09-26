@@ -22,9 +22,9 @@ const toggleCollapse = () => {
         >
           <!-- Logo区域 -->
           <div class="logo-container">
-            <img src="/src/assets/img/logo.png" alt="Logo" />
+            <!-- <img src="/src/assets/img/logo.png" alt="Logo" /> -->
             <h1 v-show="!isCollapse" style="font-size: 16px; font-weight: 500; margin: 0">
-              电力设备故障诊断平台
+              电力设备全生命周期管理平台
             </h1>
             <el-icon class="collapse-btn" @click="toggleCollapse">
               <Fold v-if="!isCollapse" />

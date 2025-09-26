@@ -281,7 +281,7 @@
                 </div>
 
                 <div class="results-preview">
-                  <h4>结果预览（前5行）：</h4>
+                  <h4>结果预览（前20行）：</h4>
                   <el-table :data="detectionResults.previewData" size="small" border stripe>
                     <el-table-column prop="time_seconds" label="时间戳" width="120" />
                     <el-table-column prop="equipment" label="设备编号" width="100" />
@@ -291,9 +291,9 @@
                     <el-table-column prop="running_equipment" label="运行设备" width="120" />
                     <el-table-column prop="fault_type" label="故障类型" width="150">
                       <template #default="{ row }">
-                        <el-tag 
-                          size="small" 
-                          :type="row.fault_type === '正常' ? 'success' : 'danger'"
+                        <el-tag
+                          size="small"
+                          :type="getFaultTagType(row.fault_type)"
                         >
                           {{ row.fault_type }}
                         </el-tag>
@@ -470,6 +470,17 @@ const canStartDetection = computed(() => {
   return validFilesCount.value > 0 && detectionConfig.model && detectionConfig.weights
 })
 
+// 获取故障标签类型
+const getFaultTagType = (faultType) => {
+  if (faultType === '正常') return 'success'
+  if (faultType.includes('过压')) return 'danger'
+  if (faultType.includes('欠压')) return 'warning'
+  if (faultType.includes('过载')) return 'danger'
+  if (faultType.includes('短路')) return 'danger'
+  if (faultType.includes('漏电')) return 'warning'
+  return 'danger' // 默认为危险类型
+}
+
 // 文件大小格式化
 const formatFileSize = (bytes) => {
   if (bytes === 0) return '0 B'
@@ -586,70 +597,232 @@ const startDetection = async () => {
   try {
     detecting.value = true
 
-    // 模拟检测过程
-    await new Promise((resolve) => setTimeout(resolve, 3000))
+    // 模拟检测过程 - 增加等待时间到5-8秒，模拟真实的后端调用
+    const detectionTime = Math.floor(Math.random() * 3000) + 5000
+    await new Promise((resolve) => setTimeout(resolve, detectionTime))
 
     // 生成模拟检测结果
-    const totalSamples = totalDataRows.value
-    const faultCount = Math.floor(totalSamples * (1 - detectionOptions.faultThreshold) * 0.3)
+    const totalSamples = totalDataRows.value || 3467
+    const faultCount = Math.floor(totalSamples * 0.3) // 固定30%的故障率
     const faultRate = (faultCount / totalSamples * 100)
 
-    // 生成预览数据 - 使用固定的前五行数据
+    // 所有故障类型
+    const faultTypes = ['过压', '欠压', '过载', '短路', '漏电']
+    
+    // 生成预览数据 - 使用model.csv中的实际数据格式，显示更多行
     const previewData = [
       {
-        time_seconds: '0',
-        equipment: '1O0',
-        voltage_V: '172.44018',
-        current1_A: '5.95485',
-        current2_A: '-5.80041',
-        running_equipment: '设备正常运行',
+        time_seconds: '0.3364315892102697',
+        equipment: 'O0',
+        voltage_V: '172.61596',
+        current1_A: '5.96079',
+        current2_A: '5.31333',
+        running_equipment: '0',
         fault_type: '正常'
       },
       {
-        time_seconds: '6.499837504062398e-05',
-        equipment: '1O0',
-        voltage_V: '172.44018',
-        current1_A: '5.95485',
-        current2_A: '-5.49153',
-        running_equipment: '设备正常运行',
+        time_seconds: '0.3364965875853103',
+        equipment: 'O0',
+        voltage_V: '172.61596',
+        current1_A: '5.96079',
+        current2_A: '5.42025',
+        running_equipment: '0',
         fault_type: '正常'
       },
       {
-        time_seconds: '0.0001299967500812',
-        equipment: '1O0',
-        voltage_V: '172.44018',
-        current1_A: '5.95485',
-        current2_A: '-5.20047',
-        running_equipment: '设备正常运行',
+        time_seconds: '0.336561585960351',
+        equipment: 'O0',
+        voltage_V: '172.61596',
+        current1_A: '5.96079',
+        current2_A: '5.52123',
+        running_equipment: '0',
         fault_type: '正常'
       },
       {
-        time_seconds: '0.0001949951251218',
-        equipment: '1O0',
-        voltage_V: '172.44018',
-        current1_A: '5.95485',
-        current2_A: '-4.89753',
-        running_equipment: '设备正常运行',
+        time_seconds: '0.3366265843353916',
+        equipment: 'O0',
+        voltage_V: '172.61596',
+        current1_A: '5.96079',
+        current2_A: '5.62221',
+        running_equipment: '0',
         fault_type: '正常'
       },
       {
-        time_seconds: '0.0002599935001624',
-        equipment: '1O0',
+        time_seconds: '0.3366915827104322',
+        equipment: 'O0',
+        voltage_V: '172.61596',
+        current1_A: '5.96079',
+        current2_A: '5.70537',
+        running_equipment: '0',
+        fault_type: '正常'
+      },
+      {
+        time_seconds: '0.3367565810854728',
+        equipment: 'O0',
+        voltage_V: '172.61596',
+        current1_A: '5.96079',
+        current2_A: '5.78853',
+        running_equipment: '0',
+        fault_type: '正常'
+      },
+      {
+        time_seconds: '0.3368215794605135',
+        equipment: 'O0',
+        voltage_V: '172.61596',
+        current1_A: '5.96079',
+        current2_A: '5.86575',
+        running_equipment: '0',
+        fault_type: '正常'
+      },
+      {
+        time_seconds: '0.3368865778355541',
+        equipment: 'O0',
+        voltage_V: '172.61596',
+        current1_A: '5.96079',
+        current2_A: '5.93109',
+        running_equipment: '0',
+        fault_type: '正常'
+      },
+      {
+        time_seconds: '0.3369515762105947',
+        equipment: 'O0',
+        voltage_V: '172.61596',
+        current1_A: '5.96079',
+        current2_A: '5.99049',
+        running_equipment: '0',
+        fault_type: '正常'
+      },
+      {
+        time_seconds: '0.3370165745856354',
+        equipment: 'O0',
         voltage_V: '172.44018',
         current1_A: '5.95485',
-        current2_A: '-4.60647',
-        running_equipment: '设备正常运行',
+        current2_A: '6.04395',
+        running_equipment: '0',
         fault_type: '正常'
+      },
+      {
+        time_seconds: '0.337081572960676',
+        equipment: 'O0',
+        voltage_V: '172.61596',
+        current1_A: '5.96079',
+        current2_A: '6.09147',
+        running_equipment: 'O0',
+        fault_type: '过压'
+      },
+      {
+        time_seconds: '0.3371465713357166',
+        equipment: 'O0',
+        voltage_V: '172.2644',
+        current1_A: '5.94891',
+        current2_A: '6.12711',
+        running_equipment: 'O0',
+        fault_type: '过压'
+      },
+      {
+        time_seconds: '0.3372115697107572',
+        equipment: 'O0',
+        voltage_V: '172.96751999999998',
+        current1_A: '5.97267',
+        current2_A: '6.15681',
+        running_equipment: 'O0',
+        fault_type: '过压'
+      },
+      {
+        time_seconds: '0.3372765680857978',
+        equipment: 'O0',
+        voltage_V: '172.08862',
+        current1_A: '5.94297',
+        current2_A: '6.18057',
+        running_equipment: 'O0',
+        fault_type: '过压'
+      },
+      {
+        time_seconds: '0.3373415664608384',
+        equipment: 'O0',
+        voltage_V: '174.0222',
+        current1_A: '6.00831',
+        current2_A: '6.19839',
+        running_equipment: 'O0',
+        fault_type: '过压'
+      },
+      {
+        time_seconds: '0.3374065648358791',
+        equipment: 'O0',
+        voltage_V: '170.85816',
+        current1_A: '5.90139',
+        current2_A: '-5.95485',
+        running_equipment: '0',
+        fault_type: '短路、过压'
+      },
+      {
+        time_seconds: '0.3374715632109197',
+        equipment: 'O0',
+        voltage_V: '-170.68238',
+        current1_A: '-5.64003',
+        current2_A: '-5.95485',
+        running_equipment: '0',
+        fault_type: '漏电、欠压'
+      },
+      {
+        time_seconds: '0.3375365615859603',
+        equipment: 'O0',
+        voltage_V: '-111.79608',
+        current1_A: '-3.65013',
+        current2_A: '6.20433',
+        running_equipment: 'O0',
+        fault_type: '漏电、欠压'
+      },
+      {
+        time_seconds: '0.337601559961001',
+        equipment: 'O0',
+        voltage_V: '-62.57768',
+        current1_A: '-1.98693',
+        current2_A: '6.19245',
+        running_equipment: 'O0',
+        fault_type: '漏电、欠压'
+      },
+      {
+        time_seconds: '0.3376665583360416',
+        equipment: 'O0',
+        voltage_V: '-22.14828',
+        current1_A: '-0.62073',
+        current2_A: '6.17463',
+        running_equipment: 'O0',
+        fault_type: '漏电、欠压'
       }
     ]
+
+    // 生成完整的模拟数据（用于下载）
+    const allData = []
+    for (let i = 0; i < totalSamples; i++) {
+      const isFault = Math.random() < 0.3 // 30%概率为故障
+      const faultType = isFault ?
+        (Math.random() < 0.3 ? faultTypes[Math.floor(Math.random() * faultTypes.length)] :
+         `${faultTypes[Math.floor(Math.random() * faultTypes.length)]}、${faultTypes[Math.floor(Math.random() * faultTypes.length)]}`) :
+        '正常'
+      
+      // 根据故障类型决定运行设备，故障时有一定概率为0
+      const runningEquipment = isFault && Math.random() < 0.3 ? '0' : 'O0'
+      
+      allData.push({
+        time_seconds: (0.3364315892102697 + i * 0.00006499837504062).toFixed(16),
+        equipment: 'O0',
+        voltage_V: (Math.random() * 400 - 200).toFixed(5),
+        current1_A: (Math.random() * 12 - 6).toFixed(5),
+        current2_A: (Math.random() * 12 - 6).toFixed(5),
+        running_equipment: runningEquipment,
+        fault_type: faultType
+      })
+    }
 
     detectionResults.value = {
       totalSamples,
       faultCount,
       faultRate,
-      processingTime: Math.floor(Math.random() * 2000) + 1000,
+      processingTime: detectionTime,
       previewData,
-      allData: [] // 这里会包含所有处理后的数据
+      allData // 包含所有处理后的数据
     }
 
     ElMessage.success('检测完成！')
@@ -666,11 +839,11 @@ const startDetection = async () => {
 const downloadResults = () => {
   if (!detectionResults.value) return
 
-  // 生成CSV内容
+  // 生成CSV内容 - 使用完整的allData而不是previewData
   const headers = [...requiredColumns.map(col => col.name), 'running_equipment', 'fault_type']
   const csvContent = [
     headers.join(','),
-    ...detectionResults.value.previewData.map(row => 
+    ...detectionResults.value.allData.map(row =>
       headers.map(header => row[header]).join(',')
     )
   ].join('\n')

@@ -170,14 +170,14 @@
 
         <div class="results-summary">
           <el-row :gutter="20">
-            <el-col :span="8">
+            <el-col :span="6">
               <el-statistic
                 title="预测时间"
                 :value="predictionResults.predictionTime"
                 suffix="ms"
               />
             </el-col>
-            <el-col :span="8">
+            <el-col :span="6">
               <el-statistic
                 title="平均置信度"
                 :value="predictionResults.avgConfidence"
@@ -185,10 +185,67 @@
                 :precision="2"
               />
             </el-col>
-            <el-col :span="8">
+            <el-col :span="6">
               <el-statistic title="处理样本数" :value="predictionResults.totalSamples" />
             </el-col>
+            <el-col :span="6">
+              <el-statistic title="故障样本数" :value="predictionResults.faultCount" />
+            </el-col>
           </el-row>
+        </div>
+
+        <!-- 故障类型统计 -->
+        <div class="fault-statistics">
+          <h3>故障类型统计</h3>
+          <el-row :gutter="20">
+            <el-col :span="4" v-for="(count, type) in predictionResults.faultTypeStats" :key="type">
+              <el-card class="fault-type-card">
+                <div class="fault-type-content">
+                  <div class="fault-type-name">{{ getFaultTypeName(type) }}</div>
+                  <div class="fault-type-count">{{ count }}</div>
+                </div>
+              </el-card>
+            </el-col>
+          </el-row>
+        </div>
+
+        <!-- 详细结果表格 -->
+        <div class="detailed-results">
+          <h3>详细预测结果</h3>
+          <el-table
+            :data="predictionResults.detailedResults"
+            style="width: 100%"
+            max-height="400"
+            stripe
+            border
+          >
+            <el-table-column prop="timestamp" label="时间戳" width="180" />
+            <el-table-column prop="equipment" label="设备" width="80" />
+            <el-table-column prop="voltage" label="电压值" width="100" />
+            <el-table-column prop="current" label="电流值" width="100" />
+            <el-table-column prop="power" label="功率值" width="100" />
+            <el-table-column prop="temperature" label="温度值" width="100" />
+            <el-table-column prop="confidence" label="置信度" width="100" />
+            <el-table-column prop="faultTypes" label="故障类型" width="150">
+              <template #default="scope">
+                <el-tag
+                  v-for="fault in scope.row.faultTypes"
+                  :key="fault"
+                  :type="getFaultTagType(fault)"
+                  class="fault-tag"
+                >
+                  {{ getFaultTypeName(fault) }}
+                </el-tag>
+              </template>
+            </el-table-column>
+            <el-table-column prop="status" label="状态" width="100">
+              <template #default="scope">
+                <el-tag :type="scope.row.status === '正常' ? 'success' : 'danger'">
+                  {{ scope.row.status }}
+                </el-tag>
+              </template>
+            </el-table-column>
+          </el-table>
         </div>
 
         <div class="results-actions">
@@ -360,12 +417,89 @@ const startPrediction = async () => {
     // Simulate prediction process
     await new Promise((resolve) => setTimeout(resolve, 3000))
 
-    // Mock prediction results
+    // Mock prediction results based on the provided data format
+    const mockData = [
+      '0.3369515762105947,O0,4012,172.61596,4012,5.96079,4022,5.99049,0,',
+      '0.3370165745856354,O0,4010,172.44018,4010,5.95485,4040,6.04395,0,',
+      '0.337081572960676,O0,4012,172.61596,4012,5.96079,4056,6.09147,O0,过压',
+      '0.3371465713357166,O0,4008,172.2644,4008,5.94891,4068,6.12711,O0,过压',
+      '0.3372115697107572,O0,4016,172.96751999999998,4016,5.97267,4078,6.15681,O0,过压',
+      '0.3372765680857978,O0,4006,172.08862,4006,5.94297,4086,6.18057,O0,过压',
+      '0.3373415664608384,O0,4028,174.0222,4028,6.00831,4092,6.19839,O0,过压',
+      '0.3374065648358791,O0,3992,170.85816,3992,5.90139,0,-5.95485,O0,短路、过压',
+      '0.3374715632109197,O0,106,-170.68238,106,-5.64003,0,-5.95485,O0,漏电、欠压'
+    ]
+
+    // Parse mock data and generate detailed results
+    const detailedResults = mockData.map((line, index) => {
+      const parts = line.split(',')
+      const timestamp = new Date(Date.now() - (mockData.length - index) * 60000).toLocaleString()
+      const equipment = parts[1] || 'O0'
+      const voltage = parseFloat(parts[2]) || 0
+      const current = parseFloat(parts[3]) || 0
+      const power = parseFloat(parts[4]) || 0
+      const temperature = parseFloat(parts[5]) || 0
+      const confidence = (Math.random() * 20 + 80).toFixed(2)
+      
+      // Extract fault types
+      const faultTypes = parts[10] ? parts[10].split('、') : []
+      
+      return {
+        timestamp,
+        equipment,
+        voltage: voltage.toFixed(2),
+        current: current.toFixed(2),
+        power: power.toFixed(2),
+        temperature: temperature.toFixed(2),
+        confidence: `${confidence}%`,
+        faultTypes,
+        status: faultTypes.length > 0 ? '故障' : '正常'
+      }
+    })
+
+    // Calculate fault type statistics
+    const faultTypeStats = {
+      overvoltage: 0,    // 过压
+      undervoltage: 0,  // 欠压
+      overload: 0,      // 过载
+      shortcircuit: 0,  // 短路
+      leakage: 0        // 漏电
+    }
+
+    let faultCount = 0
+    detailedResults.forEach(result => {
+      if (result.faultTypes.length > 0) {
+        faultCount++
+        result.faultTypes.forEach(fault => {
+          switch (fault) {
+            case '过压':
+              faultTypeStats.overvoltage++
+              break
+            case '欠压':
+              faultTypeStats.undervoltage++
+              break
+            case '过载':
+              faultTypeStats.overload++
+              break
+            case '短路':
+              faultTypeStats.shortcircuit++
+              break
+            case '漏电':
+              faultTypeStats.leakage++
+              break
+          }
+        })
+      }
+    })
+
     predictionResults.value = {
-      totalSamples: Math.floor(Math.random() * 1000) + 500,
+      totalSamples: detailedResults.length,
       predictionTime: Math.floor(Math.random() * 2000) + 1000,
       avgConfidence: Math.random() * 20 + 80,
-      results: [], // This would contain actual prediction data
+      faultCount,
+      faultTypeStats,
+      detailedResults,
+      results: [] // This would contain actual prediction data
     }
 
     ElMessage.success('预测完成！')
@@ -376,6 +510,30 @@ const startPrediction = async () => {
   } finally {
     predicting.value = false
   }
+}
+
+// 获取故障类型的中文名称
+const getFaultTypeName = (type) => {
+  const faultTypeMap = {
+    overvoltage: '过压',
+    undervoltage: '欠压',
+    overload: '过载',
+    shortcircuit: '短路',
+    leakage: '漏电'
+  }
+  return faultTypeMap[type] || type
+}
+
+// 获取故障标签的样式类型
+const getFaultTagType = (fault) => {
+  const faultTagMap = {
+    '过压': 'danger',
+    '欠压': 'warning',
+    '过载': 'danger',
+    '短路': 'danger',
+    '漏电': 'warning'
+  }
+  return faultTagMap[fault] || 'info'
 }
 
 const downloadResults = () => {
@@ -478,5 +636,54 @@ const viewDetails = () => {
 .dialog-footer {
   display: flex;
   justify-content: flex-end;
+}
+
+.fault-statistics {
+  margin: 20px 0;
+  padding: 20px;
+  background-color: #f5f7fa;
+  border-radius: 6px;
+}
+
+.fault-statistics h3 {
+  margin-bottom: 15px;
+  color: #606266;
+  font-size: 16px;
+}
+
+.fault-type-card {
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.fault-type-content {
+  padding: 10px;
+}
+
+.fault-type-name {
+  font-size: 14px;
+  color: #606266;
+  margin-bottom: 5px;
+}
+
+.fault-type-count {
+  font-size: 18px;
+  font-weight: bold;
+  color: #409EFF;
+}
+
+.detailed-results {
+  margin: 20px 0;
+}
+
+.detailed-results h3 {
+  margin-bottom: 15px;
+  color: #606266;
+  font-size: 16px;
+}
+
+.fault-tag {
+  margin-right: 5px;
+  margin-bottom: 5px;
 }
 </style>
